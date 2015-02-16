@@ -20,6 +20,7 @@
         android:gravity="center_vertical"
         android:text="Example application"
         android:textSize="20sp"
+        android:textColor="#111111"
         android:layout_centerVertical="true"
         android:layout_toEndOf="@+id/icon" />
 
@@ -37,18 +38,20 @@
             android:text="$125.67"
             android:id="@+id/textViewPrice"
             android:gravity="end"
+            android:textColor="#111111"
             android:layout_weight="1"
-            android:layout_above="@+id/firstLine"
-            android:layout_alignParentEnd="true" />
+            android:layout_above="@+id/firstLine"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="2"
-            android:text="+17.04%"
+            android:text="0.00%"
+            android:textColor="#111111"
             android:id="@+id/textViewChange"
             android:textSize="16sp"
-            android:layout_gravity="right"/>
+            android:layout_gravity="right"
+            android:gravity="end"/>
     </LinearLayout>
 
 </RelativeLayout> 

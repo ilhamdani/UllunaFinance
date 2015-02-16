@@ -29,8 +29,10 @@ public class Stock {
         this.sIcon = sIcon;
     }
 
-    public static float modifyValue(float currentValue){
+    public static float[] modifyValue(float currentValue){
         Random rand = new Random();
+        float curCopy = currentValue;
+        float result[] = new float[2];
         float change = rand.nextFloat();
         change-=0.5;
         if(Math.abs(change)<0.45)
@@ -40,10 +42,18 @@ public class Stock {
         currentValue = (float)Math.round(currentValue * 1000) / 1000;
         if (currentValue<=1 || currentValue>=30)
             currentValue=10;
-        return currentValue;
+        result[0]=currentValue;
+        result[1]=(currentValue - curCopy)/currentValue*100;
+        result[1]= roundPrice(result[1]);
+        return result;
     }
 
     public static float roundPrice(float number){
+        number = (float)Math.round(number*100)/100;
+        return number;
+    }
+
+    public static float roundPrice2(float number){
         number = (float)Math.round(number*1000)/1000;
         return number;
     }

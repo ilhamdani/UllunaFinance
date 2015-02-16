@@ -3,6 +3,8 @@ package com.ulluna.ullunafinance;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,25 +16,28 @@ import java.util.Random;
 
 public class StockList extends ActionBarActivity {
     ListView listView;
+    MySimpleArrayAdapter adapter;
+    float[] costs;
+    String[] values;
+    float[] changes;
+    SharedPreferences.Editor editor;
 
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stock_list);
         listView = (ListView) findViewById(R.id.listView);
 
         SharedPreferences sp = getSharedPreferences("com.ulluna.ullunafinance", MODE_PRIVATE);
+        editor = sp.edit();
         int i=0, count=0;
 
-        if(sp.getString("STOCK0",null)==null){
+        if(sp.getString("STOCK0",null)==null)
             fistOpen();
-        }
 
-        while(sp.getString("STOCK"+count,null)!=null){
+        while(sp.getString("STOCK"+count,null)!=null)
             count++;
-        }
 
-        String[] values = new String[count];
+        values = new String[count];
         String s=sp.getString("STOCK0",null);
 
         while(s!=null){
@@ -40,17 +45,18 @@ public class StockList extends ActionBarActivity {
             i++;
             s = sp.getString("STOCK"+i,null);
         }
+
         i=0;
         float cost = sp.getFloat("VALUE0",-1);
-        float[] costs = new float[count];
-
+        costs = new float[count];
+        changes = new float[count];
         while (cost != -1.0){
             costs[i] = cost;
             i++;
             cost = sp.getFloat("VALUE" + i, -1);
         }
 
-        final MySimpleArrayAdapter adapter = new MySimpleArrayAdapter(this, values, costs);
+        adapter = new MySimpleArrayAdapter(this, values, costs);
         listView.setAdapter(adapter);
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
@@ -63,8 +69,50 @@ public class StockList extends ActionBarActivity {
                 startActivity(intent);
             }
         });
+        timer.start();
+
     }
 
+    private Handler uiUpdater = new Handler(){
+        public void handleMessage(Message msg){
+            float temp[] = new float[2];
+            for(int i=0; i<costs.length; i++){
+                temp = Stock.modifyValue(costs[i]);
+                costs[i]=temp[0];
+                changes[i]=temp[1];
+                editor.putFloat("VALUE"+i, costs[i]);
+            }
+            editor.commit();
+
+            adapter.updateData(getApplicationContext(), values, costs, changes);
+        }
+    };
+    Thread timer = new Thread() {
+        public void run () {
+            while (!Thread.currentThread().isInterrupted()) {
+                // do stuff in a separate thread
+                uiUpdater.sendEmptyMessage(0);
+                try {
+                    sleep(5000);    // sleep for 3 seconds
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        timer.interrupt();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(!timer.isAlive())
+            timer.start();
+    }
 
     private void fistOpen(){
         SharedPreferences sp = getSharedPreferences("com.ulluna.ullunafinance", MODE_PRIVATE);

@@ -13,15 +13,33 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class MySimpleArrayAdapter extends ArrayAdapter<String> {
-    private final Context context;
-    private final String[] values;
-    private final float[] cost;
+    private Context context;
+    private String[] values;
+    private float[] cost;
+    private float[] changes;
 
     public MySimpleArrayAdapter(Context context, String[] values, float[] cost) {
         super(context, R.layout.list_adapter, values);
         this.context = context;
         this.values = values;
         this.cost = cost;
+        changes=null;
+    }
+
+    public void updateData(Context context, String[] values, float[] cost, float[] changes) {
+        this.context = context;
+        this.values = values;
+        this.cost = cost;
+        this.changes = changes;
+        notifyDataSetChanged();
+    }
+
+    public void updateData(Context context, String[] values, float[] cost) {
+        this.context = context;
+        this.values = values;
+        this.cost = cost;
+        notifyDataSetChanged();
+
     }
 
     @Override
@@ -29,12 +47,16 @@ public class MySimpleArrayAdapter extends ArrayAdapter<String> {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.list_adapter, parent, false);
+
         TextView firstLine = (TextView) rowView.findViewById(R.id.firstLine);
         TextView valueView = (TextView) rowView.findViewById(R.id.textViewPrice);
-        ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
+        TextView changeView = (TextView) rowView.findViewById(R.id.textViewChange);
         firstLine.setText(values[position]);
         valueView.setText("$" + Stock.roundPrice(cost[position]));
+        if(changes!=null)
+            changeView.setText(changes[position] + "%");
 
+        ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
         // change the icon for Windows and iPhone
         String s = values[position];
         if (s.startsWith("iPhone")) {

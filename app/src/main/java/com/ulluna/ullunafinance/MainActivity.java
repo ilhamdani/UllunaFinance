@@ -50,7 +50,7 @@ public class MainActivity extends ActionBarActivity {
 
         Thread timer = new Thread() {
             public void run () {
-                for (;;) {
+                while (true) {
                     // do stuff in a separate thread
                     uiCallback.sendEmptyMessage(0);
                     try {
@@ -71,11 +71,11 @@ public class MainActivity extends ActionBarActivity {
             Log.i("TAG", "Updated values");
 
             value = sp.getFloat("VALUE"+index,10);
-            float value2 = Stock.modifyValue(value);
+            float value2 = Stock.modifyValue(value)[0];
             editor.putFloat("VALUE"+index, value);
 
-            float change = (value-value2)/value;
-            change = (float)Math.round(change * 1000) / 1000;
+            float change = (value2-value)/value*100;
+            change = Stock.roundPrice(change);
             value=value2;
 
             editor.commit();
@@ -87,9 +87,8 @@ public class MainActivity extends ActionBarActivity {
             }
             else{
                 stockChange.setTextColor(Color.parseColor("#F44336"));
-                toDisplay+="-";
             }
-            toDisplay+= String.valueOf(change) + ")";
+            toDisplay+= String.valueOf(change) + "%)";
             stockChange.setText(toDisplay);
         }
     };
